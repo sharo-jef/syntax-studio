@@ -1,5 +1,6 @@
 import React from "react";
 import { useI18n } from "../i18n/I18nProvider";
+import { MonacoEditor } from "./MonacoEditor";
 import styles from "../styles/ShikiHelpModal.module.css";
 
 interface ShikiHelpModalProps {
@@ -30,7 +31,8 @@ export const ShikiHelpModal: React.FC<ShikiHelpModalProps> = ({
             <h3>{t("help.basicUsage.title")}</h3>
             <p>{t("help.basicUsage.description")}</p>
             <div className={styles.codeExample}>
-              <pre>{`{
+              <MonacoEditor
+                value={`{
   "name": "my-language",
   "displayName": "My Language",
   "patterns": [
@@ -43,7 +45,31 @@ export const ShikiHelpModal: React.FC<ShikiHelpModalProps> = ({
       "match": "\\"[^\\"]*\\""
     }
   ]
-}`}</pre>
+}`}
+                onChange={() => {}} // Read-only
+                language="json"
+                theme="vs-dark"
+                options={{
+                  readOnly: true,
+                  minimap: { enabled: false },
+                  fontSize: 12,
+                  lineNumbers: "off",
+                  folding: false,
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  wordWrap: "on",
+                  renderLineHighlight: "none",
+                  selectionHighlight: false,
+                  occurrencesHighlight: "off",
+                  cursorStyle: "line-thin",
+                  hideCursorInOverviewRuler: true,
+                  overviewRulerBorder: false,
+                  scrollbar: {
+                    vertical: "hidden",
+                    horizontal: "hidden",
+                  },
+                }}
+              />
             </div>
           </div>
 

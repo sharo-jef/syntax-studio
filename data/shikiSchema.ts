@@ -46,180 +46,225 @@ export const shikiJsonSchema = {
   definitions: {
     pattern: {
       type: "object",
-      oneOf: [
+      properties: {
+        name: {
+          type: "string",
+          description: "The scope name for this pattern",
+          enum: [
+            "keyword.control",
+            "keyword.operator",
+            "keyword.other",
+            "string.quoted.single",
+            "string.quoted.double",
+            "string.quoted.triple",
+            "string.unquoted",
+            "string.interpolated",
+            "string.regexp",
+            "comment.line.double-slash",
+            "comment.line.number-sign",
+            "comment.line",
+            "comment.block",
+            "comment.documentation",
+            "constant.numeric",
+            "constant.numeric.integer",
+            "constant.numeric.float",
+            "constant.numeric.hex",
+            "constant.numeric.octal",
+            "constant.numeric.binary",
+            "constant.language",
+            "constant.language.boolean",
+            "constant.language.null",
+            "constant.character",
+            "constant.character.escape",
+            "variable.parameter",
+            "variable.language",
+            "variable.other",
+            "support.function",
+            "support.class",
+            "support.type",
+            "support.constant",
+            "entity.name.function",
+            "entity.name.class",
+            "entity.name.type",
+            "entity.name.namespace",
+            "entity.name.tag",
+            "entity.other.attribute-name",
+            "invalid.illegal",
+            "invalid.deprecated",
+            "storage.type",
+            "storage.modifier",
+            "punctuation.definition.string",
+            "punctuation.definition.comment",
+            "punctuation.separator",
+            "punctuation.terminator",
+            "punctuation.accessor",
+            "meta.brace.round",
+            "meta.brace.square",
+            "meta.brace.curly",
+            "meta.function-call",
+            "meta.class",
+            "meta.import",
+            "meta.export"
+          ]
+        },
+        match: {
+          type: "string",
+          description: "Regular expression pattern to match"
+        },
+        begin: {
+          type: "string",
+          description: "Regular expression pattern that starts the match"
+        },
+        end: {
+          type: "string",
+          description: "Regular expression pattern that ends the match"
+        },
+        while: {
+          type: "string",
+          description: "Continue matching while this pattern matches"
+        },
+        include: {
+          type: "string",
+          description: "Reference to another pattern",
+          pattern: "^(#[a-zA-Z_][a-zA-Z0-9_-]*|\\$self|\\$base|source\\.[a-z][a-z0-9\\.-]*)$"
+        },
+        patterns: {
+          type: "array",
+          description: "Array of nested patterns",
+          items: {
+            $ref: "#/definitions/pattern"
+          }
+        },
+        captures: {
+          type: "object",
+          description: "Named capture groups from the match pattern",
+          patternProperties: {
+            "^[0-9]+$": {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  description: "Scope name for this capture group"
+                }
+              }
+            }
+          }
+        },
+        beginCaptures: {
+          type: "object",
+          description: "Named capture groups from the begin pattern",
+          patternProperties: {
+            "^[0-9]+$": {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  description: "Scope name for this capture group"
+                }
+              }
+            }
+          }
+        },
+        endCaptures: {
+          type: "object",
+          description: "Named capture groups from the end pattern",
+          patternProperties: {
+            "^[0-9]+$": {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  description: "Scope name for this capture group"
+                }
+              }
+            }
+          }
+        },
+        whileCaptures: {
+          type: "object",
+          description: "Named capture groups from the while pattern",
+          patternProperties: {
+            "^[0-9]+$": {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  description: "Scope name for this capture group"
+                }
+              }
+            }
+          }
+        },
+        contentName: {
+          type: "string",
+          description: "Scope name for the content between begin/end or begin/while"
+        },
+        comment: {
+          type: "string",
+          description: "Human-readable description of this pattern"
+        }
+      },
+      anyOf: [
         {
           // Simple match pattern
-          properties: {
-            name: {
-              type: "string",
-              description: "The scope name for this pattern",
-              enum: [
-                "keyword.control",
-                "keyword.operator",
-                "keyword.other",
-                "string.quoted.single",
-                "string.quoted.double",
-                "string.quoted.triple",
-                "string.unquoted",
-                "string.interpolated",
-                "string.regexp",
-                "comment.line.double-slash",
-                "comment.line.number-sign",
-                "comment.line",
-                "comment.block",
-                "comment.documentation",
-                "constant.numeric",
-                "constant.numeric.integer",
-                "constant.numeric.float",
-                "constant.numeric.hex",
-                "constant.numeric.octal",
-                "constant.numeric.binary",
-                "constant.language",
-                "constant.language.boolean",
-                "constant.language.null",
-                "constant.character",
-                "constant.character.escape",
-                "variable.parameter",
-                "variable.language",
-                "variable.other",
-                "support.function",
-                "support.class",
-                "support.type",
-                "support.constant",
-                "entity.name.function",
-                "entity.name.class",
-                "entity.name.type",
-                "entity.name.namespace",
-                "entity.name.tag",
-                "entity.other.attribute-name",
-                "invalid.illegal",
-                "invalid.deprecated",
-                "storage.type",
-                "storage.modifier",
-                "punctuation.definition.string",
-                "punctuation.definition.comment",
-                "punctuation.separator",
-                "punctuation.terminator",
-                "punctuation.accessor",
-                "meta.brace.round",
-                "meta.brace.square",
-                "meta.brace.curly",
-                "meta.function-call",
-                "meta.class",
-                "meta.import",
-                "meta.export"
-              ]
-            },
-            match: {
-              type: "string",
-              description: "Regular expression pattern to match"
-            }
-          },
-          required: ["match"],
-          additionalProperties: false
+          required: ["match"]
         },
         {
           // Begin/end pattern
-          properties: {
-            name: {
-              type: "string",
-              description: "The scope name for this pattern"
-            },
-            begin: {
-              type: "string",
-              description: "Regular expression pattern that starts the match"
-            },
-            end: {
-              type: "string",
-              description: "Regular expression pattern that ends the match"
-            },
-            patterns: {
-              type: "array",
-              description: "Patterns to apply within the begin/end block",
-              items: {
-                $ref: "#/definitions/pattern"
-              }
-            },
-            captures: {
-              type: "object",
-              description: "Named capture groups from the begin pattern",
-              patternProperties: {
-                "^[0-9]+$": {
-                  type: "object",
-                  properties: {
-                    name: {
-                      type: "string",
-                      description: "Scope name for this capture group"
-                    }
-                  }
-                }
-              }
-            },
-            beginCaptures: {
-              type: "object",
-              description: "Named capture groups from the begin pattern",
-              patternProperties: {
-                "^[0-9]+$": {
-                  type: "object",
-                  properties: {
-                    name: {
-                      type: "string",
-                      description: "Scope name for this capture group"
-                    }
-                  }
-                }
-              }
-            },
-            endCaptures: {
-              type: "object",
-              description: "Named capture groups from the end pattern",
-              patternProperties: {
-                "^[0-9]+$": {
-                  type: "object",
-                  properties: {
-                    name: {
-                      type: "string",
-                      description: "Scope name for this capture group"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          required: ["begin", "end"],
-          additionalProperties: false
+          required: ["begin", "end"]
+        },
+        {
+          // Begin/while pattern
+          required: ["begin", "while"]
         },
         {
           // Include pattern
-          properties: {
-            include: {
-              type: "string",
-              description: "Reference to another pattern",
-              pattern: "^(#[a-zA-Z_][a-zA-Z0-9_-]*|\\$self|\\$base)$"
-            }
-          },
-          required: ["include"],
-          additionalProperties: false
+          required: ["include"]
         },
         {
           // Nested patterns
-          properties: {
-            name: {
-              type: "string",
-              description: "The scope name for this pattern"
-            },
-            patterns: {
-              type: "array",
-              description: "Array of nested patterns",
-              items: {
-                $ref: "#/definitions/pattern"
-              }
-            }
-          },
-          required: ["patterns"],
-          additionalProperties: false
+          required: ["patterns"]
         }
-      ]
+      ],
+      not: {
+        anyOf: [
+          {
+            // Cannot have both match and begin
+            allOf: [
+              { required: ["match"] },
+              { required: ["begin"] }
+            ]
+          },
+          {
+            // Cannot have both match and include
+            allOf: [
+              { required: ["match"] },
+              { required: ["include"] }
+            ]
+          },
+          {
+            // Cannot have both include and begin
+            allOf: [
+              { required: ["include"] },
+              { required: ["begin"] }
+            ]
+          },
+          {
+            // Cannot have both include and patterns (at root level)
+            allOf: [
+              { required: ["include"] },
+              { required: ["patterns"] }
+            ]
+          },
+          {
+            // Cannot have both end and while
+            allOf: [
+              { required: ["end"] },
+              { required: ["while"] }
+            ]
+          }
+        ]
+      }
     }
   }
 };
@@ -300,82 +345,167 @@ export const commonRegexPatterns = [
 export const shikiCompletionItems = [
   {
     label: "name",
-    insertText: '"name": "${1:my-language}"',
-    documentation: "Unique identifier for this language (required)"
+    insertText: '"name": "${1:scope.name}"',
+    documentation: "Scope name for this pattern",
+    kind: "Property"
   },
   {
-    label: "displayName",
+    label: "displayName", 
     insertText: '"displayName": "${1:My Language}"',
-    documentation: "Human-readable name for this language"
-  },
-  {
-    label: "aliases",
-    insertText: '"aliases": ["${1:alias1}", "${2:alias2}"]',
-    documentation: "Alternative names for this language"
+    documentation: "Human-readable name for this language",
+    kind: "Property"
   },
   {
     label: "patterns",
-    insertText: '"patterns": [\n\t{\n\t\t"name": "${1:keyword.control}",\n\t\t"match": "${2:\\\\\\\\b(if|else|while)\\\\\\\\b}"\n\t}\n]',
-    documentation: "Array of patterns that define syntax highlighting rules (required)"
+    insertText: '"patterns": []',
+    documentation: "Array of patterns that define syntax highlighting rules",
+    kind: "Property"
   },
   {
     label: "repository",
-    insertText: '"repository": {\n\t"${1:patternName}": {\n\t\t"patterns": [\n\t\t\t{\n\t\t\t\t"name": "${2:scope.name}",\n\t\t\t\t"match": "${3:pattern}"\n\t\t\t}\n\t\t]\n\t}\n}',
-    documentation: "Named patterns that can be referenced by include statements"
+    insertText: '"repository": {}',
+    documentation: "Named patterns that can be referenced by include statements",
+    kind: "Property"
   },
   {
-    label: "pattern-match",
-    insertText: '{\n\t"name": "${1:keyword.control}",\n\t"match": "${2:\\\\\\\\b(keyword)\\\\\\\\b}"\n}',
-    documentation: "Simple match pattern"
+    label: "match",
+    insertText: '"match": "${1:regex}"',
+    documentation: "Regular expression pattern to match",
+    kind: "Property"
   },
   {
-    label: "pattern-begin-end",
-    insertText: '{\n\t"name": "${1:string.quoted.double}",\n\t"begin": "${2:\\"}",\n\t"end": "${3:\\"}",\n\t"patterns": [\n\t\t{\n\t\t\t"name": "${4:constant.character.escape}",\n\t\t\t"match": "${5:\\\\\\\\.}"\n\t\t}\n\t]\n}',
-    documentation: "Begin/end pattern for multi-line constructs"
+    label: "begin",
+    insertText: '"begin": "${1:start-regex}"',
+    documentation: "Start pattern for begin/end blocks",
+    kind: "Property"
   },
   {
-    label: "pattern-include",
-    insertText: '{\n\t"include": "${1:#patternName}"\n}',
-    documentation: "Include reference to another pattern"
+    label: "end",
+    insertText: '"end": "${1:end-regex}"',
+    documentation: "End pattern for begin/end blocks",
+    kind: "Property"
   },
   {
-    label: "keyword-pattern",
-    insertText: '{\n\t"name": "keyword.control",\n\t"match": "\\\\\\\\b(${1:if|else|while|for|function|return})\\\\\\\\b"\n}',
-    documentation: "Pattern for matching keywords"
+    label: "include",
+    insertText: '"include": "${1:#patternName}"',
+    documentation: "Reference to another pattern",
+    kind: "Property"
   },
   {
-    label: "string-pattern",
-    insertText: '{\n\t"name": "string.quoted.double",\n\t"begin": "\\"",\n\t"end": "\\"",\n\t"patterns": [\n\t\t{\n\t\t\t"name": "constant.character.escape",\n\t\t\t"match": "\\\\\\\\\\\\\\\\.",\n\t\t\t"comment": "Escaped characters"\n\t\t}\n\t]\n}',
-    documentation: "Pattern for matching quoted strings with escape sequences"
+    label: "captures",
+    insertText: '"captures": {}',
+    documentation: "Capture groups for match pattern",
+    kind: "Property"
   },
   {
-    label: "comment-line-pattern",
-    insertText: '{\n\t"name": "comment.line.double-slash",\n\t"match": "//${1:.*$}"\n}',
-    documentation: "Pattern for single-line comments"
+    label: "beginCaptures",
+    insertText: '"beginCaptures": {}',
+    documentation: "Capture groups for begin pattern",
+    kind: "Property"
   },
   {
-    label: "comment-block-pattern",
-    insertText: '{\n\t"name": "comment.block",\n\t"begin": "/\\\\*",\n\t"end": "\\\\*/",\n\t"patterns": [\n\t\t{\n\t\t\t"name": "comment.block.documentation",\n\t\t\t"match": "\\\\*.*$"\n\t\t}\n\t]\n}',
-    documentation: "Pattern for block comments"
+    label: "endCaptures",
+    insertText: '"endCaptures": {}',
+    documentation: "Capture groups for end pattern",
+    kind: "Property"
   },
   {
-    label: "number-pattern",
-    insertText: '{\n\t"name": "constant.numeric",\n\t"match": "\\\\\\\\b\\\\\\\\d+(\\\\\\\\.\\\\\\\\d+)?\\\\\\\\b"\n}',
-    documentation: "Pattern for numeric literals (integers and floats)"
+    label: "while",
+    insertText: '"while": "${1:continue-regex}"',
+    documentation: "Continue matching while pattern matches",
+    kind: "Property"
   },
   {
-    label: "identifier-pattern",
-    insertText: '{\n\t"name": "variable.other",\n\t"match": "\\\\\\\\b[a-zA-Z_][a-zA-Z0-9_]*\\\\\\\\b"\n}',
-    documentation: "Pattern for identifiers (variables, function names)"
+    label: "contentName",
+    insertText: '"contentName": "${1:scope.name}"',
+    documentation: "Scope name for content between begin/end",
+    kind: "Property"
   },
   {
-    label: "function-call-pattern",
-    insertText: '{\n\t"name": "entity.name.function",\n\t"match": "\\\\\\\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\\\\\\\s*\\\\\\\\()"\n}',
-    documentation: "Pattern for function calls"
+    label: "comment",
+    insertText: '"comment": "${1:description}"',
+    documentation: "Human-readable description",
+    kind: "Property"
+  }
+];
+
+export const commonIncludePatterns = [
+  {
+    pattern: '$self',
+    description: 'Include the entire grammar recursively',
+    usage: 'Use within nested patterns to allow recursive language constructs'
   },
   {
-    label: "operator-pattern",
-    insertText: '{\n\t"name": "keyword.operator",\n\t"match": "[${1:+\\\\-*/=<>!&|^%}]"\n}',
-    documentation: "Pattern for operators"
+    pattern: '$base',
+    description: 'Include the base language scope',
+    usage: 'Useful for embedded languages or extending existing grammars'
+  },
+  {
+    pattern: '#repository-name',
+    description: 'Reference a named pattern from the repository',
+    usage: 'Include a specific pattern defined in the repository section'
+  },
+  {
+    pattern: 'source.other-language',
+    description: 'Include another language grammar',
+    usage: 'Embed syntax from another language (e.g., JavaScript in HTML)'
+  }
+];
+
+export const advancedPatternExamples = [
+  {
+    name: 'String interpolation',
+    pattern: {
+      name: 'string.quoted.double.interpolated',
+      begin: '"',
+      end: '"',
+      patterns: [
+        {
+          name: 'constant.character.escape',
+          match: '\\\\.'
+        },
+        {
+          name: 'meta.interpolation',
+          begin: '\\$\\{',
+          end: '\\}',
+          patterns: [
+            { include: '$self' }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    name: 'Nested block comments',
+    pattern: {
+      name: 'comment.block.nested',
+      begin: '/\\*',
+      end: '\\*/',
+      patterns: [
+        { include: '#block-comment' }
+      ]
+    }
+  },
+  {
+    name: 'Function with typed parameters',
+    pattern: {
+      name: 'meta.function.definition',
+      begin: '\\b(function)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(',
+      end: '\\)',
+      beginCaptures: {
+        '1': { name: 'storage.type.function' },
+        '2': { name: 'entity.name.function' }
+      },
+      patterns: [
+        {
+          name: 'meta.parameter',
+          match: '([a-zA-Z_][a-zA-Z0-9_]*)\\s*:\\s*([a-zA-Z_][a-zA-Z0-9_]*)',
+          captures: {
+            '1': { name: 'variable.parameter' },
+            '2': { name: 'support.type' }
+          }
+        }
+      ]
+    }
   }
 ];
