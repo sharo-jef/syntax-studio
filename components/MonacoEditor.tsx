@@ -123,7 +123,7 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
           );
         }
       } catch (error) {
-        console.error("Failed to register custom language:", error);
+        // Failed to register custom language, will continue with default highlighting
       }
     },
     [convertShikiToMonarch]

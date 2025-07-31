@@ -10,32 +10,30 @@ const SyntaxHighlighter: React.FC = () => {
   const [languageCode, setLanguageCode] = useState<string>("");
   const [shikiConfig, setShikiConfig] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [saveStatus, setSaveStatus] = useState<string>("");
 
-  // Initialize with translated content only once
+  // Initialize with translated content only if no saved languages exist
   React.useEffect(() => {
     if (!isInitialized) {
-      setLanguageCode(t("sampleCode.newLanguageSample"));
-      setShikiConfig(
-        '{\n  "name": "my-language",\n  "displayName": "My Language",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}'
-      );
       setIsInitialized(true);
     }
-  }, [t, isInitialized]);
+  }, [isInitialized]);
 
-  // Handle locale changes - update default content if and only if untouched
+  // Handle locale changes - update default content only if no saved language is active
   React.useEffect(() => {
-    // 厳密に「初期状態」のみ書き換え（空 or 現在の言語の初期サンプルのみ）
-    const defaultSamples = [
-      t("sampleCode.newLanguageSample"),
-      t("sampleCode.myLanguageSample"),
-    ];
-    const isDefaultContent =
-      languageCode === "" || defaultSamples.includes(languageCode);
+    // This will be handled by the restoration effect after currentLanguageId is available
+    if (isInitialized) {
+      const defaultSamples = [
+        t("sampleCode.newLanguageSample"),
+        t("sampleCode.myLanguageSample"),
+      ];
+      const isDefaultContent =
+        languageCode === "" || defaultSamples.includes(languageCode);
 
-    if (isDefaultContent && isInitialized) {
-      setLanguageCode(t("sampleCode.newLanguageSample"));
+      if (isDefaultContent) {
+        setLanguageCode(t("sampleCode.newLanguageSample"));
+      }
     }
-    // それ以外（ユーザーが編集済み）は絶対に上書きしない
   }, [currentLocale, t, languageCode, isInitialized]);
 
   const [currentLanguageConfig, setCurrentLanguageConfig] = useState<
@@ -125,7 +123,7 @@ const SyntaxHighlighter: React.FC = () => {
         "languages.newLanguage"
       )} ${new Date().toLocaleTimeString()}`;
       setTimeout(() => {
-        saveLanguageRef.current(
+        saveLanguage(
           id,
           name,
           { ...languageConfig, name },
@@ -138,7 +136,7 @@ const SyntaxHighlighter: React.FC = () => {
         );
       }, 100);
     } catch (error) {
-      console.error("Failed to create new language:", error);
+      // Language creation failed, but we'll continue silently
     }
   };
 
@@ -152,29 +150,47 @@ const SyntaxHighlighter: React.FC = () => {
     ) {
       // debounce効果のため少し遅延を追加
       const timeoutId = setTimeout(() => {
-        // Find existing saved language
+        // Find existing saved language using ref to get the latest value
         const existingSaved = savedLanguagesRef.current.find(
           (lang: SavedLanguage) => lang.id === currentLanguageId
         );
 
         // Auto-save only existing languages
         if (existingSaved) {
-          // Update name if displayName has changed
+          // Check if there are actual changes to avoid unnecessary saves
           const displayName =
             currentShikiConfig.displayName || currentShikiConfig.name;
           const shouldUpdateName =
             displayName && displayName !== existingSaved.name;
           const name = shouldUpdateName ? displayName : existingSaved.name;
 
-          saveLanguageRef.current(
-            currentLanguageId,
-            name,
-            currentLanguageConfig,
-            currentShikiConfig,
-            languageCode
-          );
+          // Check if content has actually changed
+          const hasChanges =
+            existingSaved.sampleCode !== languageCode ||
+            JSON.stringify(existingSaved.shikiConfig) !==
+              JSON.stringify(currentShikiConfig) ||
+            existingSaved.name !== name;
+
+          if (hasChanges) {
+            try {
+              saveLanguageRef.current(
+                currentLanguageId,
+                name,
+                currentLanguageConfig,
+                currentShikiConfig,
+                languageCode
+              );
+
+              // Show save success notification
+              setSaveStatus(t("saveStatus.saved"));
+              setTimeout(() => setSaveStatus(""), 2000);
+            } catch (error) {
+              setSaveStatus(t("saveStatus.failed"));
+              setTimeout(() => setSaveStatus(""), 2000);
+            }
+          }
         }
-      }, 500); // 500ms後に自動保存
+      }, 300); // 300ms後に自動保存（より高速な反応）
 
       return () => clearTimeout(timeoutId);
     }
@@ -183,6 +199,7 @@ const SyntaxHighlighter: React.FC = () => {
     currentShikiConfig,
     currentLanguageId,
     languageCode,
+    t,
   ]);
 
   const handleLoadLanguage = (language: SavedLanguage) => {
@@ -259,6 +276,8 @@ const SyntaxHighlighter: React.FC = () => {
       if (id === currentLanguageId) {
         setCurrentLanguageConfig(updatedLanguageConfig);
         setCurrentShikiConfig(updatedShikiConfig);
+        // Update the JSON string as well to reflect the name change
+        setShikiConfig(JSON.stringify(updatedShikiConfig, null, 2));
       }
     }
   };
@@ -309,28 +328,42 @@ const SyntaxHighlighter: React.FC = () => {
         setCurrentLanguageId(id);
       }
     } catch (error) {
-      console.error("Failed to parse shiki config:", error);
+      // Failed to parse shiki config, will use default
     }
   }, [shikiConfig, currentLanguageId]);
 
-  // Restore the last selected language on initialization
+  // Restore the last selected language on initialization, or set default content
   React.useEffect(() => {
-    if (savedLanguages.length > 0 && !currentLanguageId) {
+    if (isInitialized && savedLanguages.length > 0) {
       const lastLanguageId = getCurrentLanguageId();
-      if (lastLanguageId) {
+      if (lastLanguageId && currentLanguageId === lastLanguageId) {
         const lastLanguage = savedLanguages.find(
           (lang) => lang.id === lastLanguageId
         );
-        if (lastLanguage) {
-          setCurrentLanguageId(lastLanguageId);
-          setLanguageCode(lastLanguage.sampleCode);
-          setShikiConfig(JSON.stringify(lastLanguage.shikiConfig, null, 2));
-          setCurrentLanguageConfig(lastLanguage.languageConfig);
-          setCurrentShikiConfig(lastLanguage.shikiConfig);
+        if (lastLanguage && languageCode === "") {
+          // Use the existing handleLoadLanguage function which we know works
+          handleLoadLanguage(lastLanguage);
+          return; // Exit early if language was restored
         }
       }
     }
-  }, [savedLanguages, currentLanguageId, getCurrentLanguageId]); // Execute after savedLanguages is loaded
+
+    // If no saved language to restore and not yet initialized with default content
+    if (isInitialized && !currentLanguageId && languageCode === "") {
+      setLanguageCode(t("sampleCode.newLanguageSample"));
+      setShikiConfig(
+        '{\n  "name": "my-language",\n  "displayName": "My Language",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}'
+      );
+    }
+  }, [
+    savedLanguages,
+    currentLanguageId,
+    getCurrentLanguageId,
+    isInitialized,
+    languageCode,
+    t,
+    handleLoadLanguage,
+  ]);
 
   // Update configuration when shikiConfig changes and is not empty
   React.useEffect(() => {
@@ -351,6 +384,7 @@ const SyntaxHighlighter: React.FC = () => {
       />
 
       <div style={styles.mainContent}>
+        {saveStatus && <div style={styles.saveNotification}>{saveStatus}</div>}
         <div style={styles.editorContainer}>
           <div style={styles.leftPanel}>
             <div style={styles.panelHeader}>{t("panels.sampleCode")}</div>
@@ -431,6 +465,20 @@ const styles = {
     fontSize: "12px",
     fontWeight: 500 as const,
     color: "#cccccc",
+  },
+  saveNotification: {
+    position: "fixed" as const,
+    bottom: "16px",
+    right: "16px",
+    background: "rgba(0, 0, 0, 0.8)",
+    color: "#4CAF50",
+    padding: "8px 12px",
+    borderRadius: "4px",
+    fontSize: "12px",
+    zIndex: 1000,
+    border: "1px solid rgba(76, 175, 80, 0.3)",
+    backdropFilter: "blur(4px)",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
   },
 };
 

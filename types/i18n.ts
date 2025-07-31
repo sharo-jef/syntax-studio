@@ -57,4 +57,10 @@ export interface Translations {
   languageSwitcher: {
     changeLanguage: string;
   };
+  
+  // Save status
+  saveStatus: {
+    saved: string;
+    failed: string;
+  };
 }

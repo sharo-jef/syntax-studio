@@ -47,4 +47,9 @@ export const enTranslations: Translations = {
   languageSwitcher: {
     changeLanguage: 'Change Language',
   },
+  
+  saveStatus: {
+    saved: 'Saved',
+    failed: 'Save failed',
+  },
 };

@@ -19,7 +19,6 @@ export const useLocalStorage = () => {
         setSavedLanguages(Array.isArray(parsed) ? parsed : []);
       }
     } catch (error) {
-      console.error('Failed to load from localStorage:', error);
       setSavedLanguages([]);
     }
   };
@@ -29,7 +28,7 @@ export const useLocalStorage = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(languages));
       setSavedLanguages(languages);
     } catch (error) {
-      console.error('Failed to save to localStorage:', error);
+      // Failed to save to localStorage
     }
   };
 
@@ -87,7 +86,7 @@ export const useLocalStorage = () => {
     try {
       localStorage.setItem(CURRENT_LANGUAGE_KEY, id);
     } catch (error) {
-      console.error('Failed to save current language ID:', error);
+      // Failed to save current language ID
     }
   };
 
@@ -95,7 +94,6 @@ export const useLocalStorage = () => {
     try {
       return localStorage.getItem(CURRENT_LANGUAGE_KEY);
     } catch (error) {
-      console.error('Failed to get current language ID:', error);
       return null;
     }
   };

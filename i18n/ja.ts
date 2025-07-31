@@ -47,4 +47,9 @@ export const jaTranslations: Translations = {
   languageSwitcher: {
     changeLanguage: '言語を変更',
   },
+  
+  saveStatus: {
+    saved: '保存しました',
+    failed: '保存に失敗しました',
+  },
 };

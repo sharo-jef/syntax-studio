@@ -3,7 +3,7 @@ import { useEffect, useRef, useCallback } from 'react';
 export const useAutoSave = (
   value: string,
   onSave: (value: string) => void,
-  delay: number = 1000
+  delay: number = 500
 ) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousValueRef = useRef<string>(value);

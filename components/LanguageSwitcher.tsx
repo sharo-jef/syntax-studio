@@ -12,7 +12,6 @@ export const LanguageSwitcher: React.FC = () => {
   );
 
   const handleLocaleChange = (localeId: string) => {
-    console.log("LanguageSwitcher: handleLocaleChange called with:", localeId);
     changeLocale(localeId);
     setIsOpen(false);
   };
@@ -25,9 +24,6 @@ export const LanguageSwitcher: React.FC = () => {
         title={t("languageSwitcher.changeLanguage")}
       >
         <VscGlobe style={switcherStyles.icon} />
-        <span style={switcherStyles.currentLocale}>
-          {currentLocaleInfo?.flag} {currentLocaleInfo?.name}
-        </span>
       </button>
 
       {isOpen && (
@@ -67,20 +63,19 @@ const switcherStyles = {
     border: "none",
     color: "#cccccc",
     cursor: "pointer",
-    padding: "6px 8px",
+    padding: "4px",
     borderRadius: "2px",
     fontSize: "12px",
     display: "flex",
     alignItems: "center",
-    gap: "6px",
+    justifyContent: "center",
     outline: "none",
     transition: "background-color 0.2s ease",
+    width: "24px",
+    height: "24px",
   },
   icon: {
     fontSize: "16px",
-  },
-  currentLocale: {
-    fontSize: "12px",
   },
   dropdown: {
     position: "absolute" as const,

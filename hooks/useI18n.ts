@@ -18,7 +18,7 @@ export const useI18n = () => {
         setCurrentLocale(savedLocale);
       }
     } catch (error) {
-      console.error('Failed to load locale from localStorage:', error);
+      // Failed to load locale from localStorage, will use default
     }
   }, []);
 
@@ -27,7 +27,7 @@ export const useI18n = () => {
     try {
       localStorage.setItem(LOCALE_STORAGE_KEY, currentLocale);
     } catch (error) {
-      console.error('Failed to save locale to localStorage:', error);
+      // Failed to save locale to localStorage
     }
   }, [currentLocale]);
 
