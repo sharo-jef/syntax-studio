@@ -210,6 +210,18 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
         insertSpaces: true,
         wordWrap: "on",
         scrollBeyondLastLine: false,
+        // Selection related options to ensure proper selection display
+        selectOnLineNumbers: true,
+        selectionHighlight: true,
+        occurrencesHighlight: "singleFile",
+        renderLineHighlight: "line",
+        showFoldingControls: "mouseover",
+        // Ensure text selection is enabled
+        readOnly: false,
+        domReadOnly: false,
+        // Mouse and selection behavior
+        mouseWheelZoom: false,
+        multiCursorModifier: "ctrlCmd",
         ...options,
       }}
     />
