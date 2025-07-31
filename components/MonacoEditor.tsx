@@ -1,6 +1,11 @@
 import React, { useRef } from "react";
 import Editor from "@monaco-editor/react";
 import { LanguageConfig } from "../types/syntax";
+import {
+  shikiJsonSchema,
+  shikiCompletionItems,
+  commonRegexPatterns,
+} from "../data/shikiSchema";
 
 // Monaco types for type safety
 type Monaco = typeof import("monaco-editor");
@@ -47,6 +52,162 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
       };
 
       return mapping[shikiTokenName] || "identifier";
+    },
+    []
+  );
+
+  const setupShikiJsonCompletion = React.useCallback(
+    (monacoInstance: Monaco) => {
+      // Configure JSON language service with Shiki schema
+      const jsonDiagnosticsOptions = {
+        validate: true,
+        allowComments: false,
+        schemaValidation: "error" as const,
+        enableSchemaRequest: true,
+        schemas: [
+          {
+            uri: "http://shiki-schema.json",
+            fileMatch: ["*"],
+            schema: shikiJsonSchema,
+          },
+        ],
+      };
+
+      monacoInstance.languages.json.jsonDefaults.setDiagnosticsOptions(
+        jsonDiagnosticsOptions
+      );
+
+      // Register completion item provider for enhanced Shiki JSON completion
+      const completionProvider =
+        monacoInstance.languages.registerCompletionItemProvider("json", {
+          provideCompletionItems: (model, position) => {
+            const textUntilPosition = model.getValueInRange({
+              startLineNumber: 1,
+              startColumn: 1,
+              endLineNumber: position.lineNumber,
+              endColumn: position.column,
+            });
+
+            const word = model.getWordUntilPosition(position);
+            const range = {
+              startLineNumber: position.lineNumber,
+              endLineNumber: position.lineNumber,
+              startColumn: word.startColumn,
+              endColumn: word.endColumn,
+            };
+
+            // Determine context
+            const isInPatterns = textUntilPosition.includes('"patterns"');
+            const isInMatch = textUntilPosition.includes('"match"');
+            const isInName = textUntilPosition.includes('"name"');
+            const lineText = model.getLineContent(position.lineNumber);
+            const beforeCursor = lineText.substring(0, position.column - 1);
+
+            let suggestions: any[] = [];
+
+            // Provide regex pattern suggestions when editing "match" field
+            if (
+              isInMatch &&
+              (beforeCursor.includes('"match"') ||
+                beforeCursor.includes('"begin"') ||
+                beforeCursor.includes('"end"'))
+            ) {
+              suggestions = commonRegexPatterns.map((pattern) => ({
+                label: pattern.name,
+                kind: monacoInstance.languages.CompletionItemKind.Snippet,
+                insertText: pattern.pattern,
+                documentation: pattern.description,
+                range: range,
+              }));
+            }
+
+            // Provide scope name suggestions when editing "name" field
+            if (isInName && beforeCursor.includes('"name"')) {
+              const scopeNames = [
+                "keyword.control",
+                "keyword.operator",
+                "keyword.other",
+                "string.quoted.single",
+                "string.quoted.double",
+                "string.quoted.triple",
+                "string.unquoted",
+                "string.interpolated",
+                "string.regexp",
+                "comment.line.double-slash",
+                "comment.line.number-sign",
+                "comment.line",
+                "comment.block",
+                "comment.documentation",
+                "constant.numeric",
+                "constant.numeric.integer",
+                "constant.numeric.float",
+                "constant.numeric.hex",
+                "constant.numeric.octal",
+                "constant.numeric.binary",
+                "constant.language",
+                "constant.language.boolean",
+                "constant.language.null",
+                "constant.character",
+                "constant.character.escape",
+                "variable.parameter",
+                "variable.language",
+                "variable.other",
+                "support.function",
+                "support.class",
+                "support.type",
+                "support.constant",
+                "entity.name.function",
+                "entity.name.class",
+                "entity.name.type",
+                "entity.name.namespace",
+                "entity.name.tag",
+                "entity.other.attribute-name",
+                "invalid.illegal",
+                "invalid.deprecated",
+                "storage.type",
+                "storage.modifier",
+                "punctuation.definition.string",
+                "punctuation.definition.comment",
+                "punctuation.separator",
+                "punctuation.terminator",
+                "punctuation.accessor",
+                "meta.brace.round",
+                "meta.brace.square",
+                "meta.brace.curly",
+                "meta.function-call",
+                "meta.class",
+                "meta.import",
+                "meta.export",
+              ];
+
+              suggestions = scopeNames.map((scopeName) => ({
+                label: scopeName,
+                kind: monacoInstance.languages.CompletionItemKind.Value,
+                insertText: scopeName,
+                documentation: `TextMate scope name: ${scopeName}`,
+                range: range,
+              }));
+            }
+
+            // Provide structure suggestions for JSON objects
+            if (!isInMatch && !isInName) {
+              suggestions = shikiCompletionItems.map((item) => ({
+                label: item.label,
+                kind: monacoInstance.languages.CompletionItemKind.Snippet,
+                insertText: item.insertText,
+                insertTextRules:
+                  monacoInstance.languages.CompletionItemInsertTextRule
+                    .InsertAsSnippet,
+                documentation: item.documentation,
+                range: range,
+              }));
+            }
+
+            return { suggestions };
+          },
+        });
+
+      return completionProvider;
     },
     []
   );
@@ -162,14 +323,9 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
       }
     }
 
-    // Enhance JSON completion for shiki config files
+    // Enhanced JSON completion for shiki config files
     if (language === "json") {
-      monacoInstance.languages.json.jsonDefaults.setDiagnosticsOptions({
-        validate: true,
-        allowComments: false,
-        schemaValidation: "error",
-        enableSchemaRequest: true,
-      });
+      setupShikiJsonCompletion(monacoInstance);
     }
 
     // Add paste event handling
@@ -215,6 +371,11 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
         selectionHighlight: true,
         occurrencesHighlight: "singleFile",
         renderLineHighlight: "line",
+        cursorBlinking: "blink",
+        cursorSmoothCaretAnimation: "on",
+        smoothScrolling: true,
+        // Code folding
+        folding: true,
         showFoldingControls: "mouseover",
         // Ensure text selection is enabled
         readOnly: false,

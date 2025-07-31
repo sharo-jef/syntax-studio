@@ -95,13 +95,31 @@ npm run start
 3. Edit Shiki configuration (JSON) in the right editor
 4. Syntax highlighting is applied in real-time
 
-### 2. Saving and Managing Language Configurations
+### 2. Enhanced JSON Editor Features
+
+The Shiki configuration editor provides comprehensive auto-completion:
+
+- **Schema Validation**: Real-time validation of JSON structure against Shiki schema
+- **Property Suggestions**: Auto-complete for all Shiki configuration properties (`name`, `displayName`, `patterns`, etc.)
+- **Scope Name Completion**: Built-in suggestions for TextMate scope names (e.g., `keyword.control`, `string.quoted.double`)
+- **Regex Pattern Snippets**: Pre-defined common regex patterns for matching keywords, strings, comments, numbers, etc.
+- **Structure Templates**: Quick insertion of pattern templates (simple match, begin/end blocks, includes)
+- **Context-Aware Suggestions**: Different completions based on cursor position and surrounding JSON structure
+
+#### Using Auto-Completion
+
+- Press `Ctrl+Space` to trigger suggestions manually
+- Suggestions appear automatically while typing
+- Use arrow keys to navigate suggestions, `Enter` to accept
+- `Tab` key for snippet field navigation
+
+### 3. Saving and Managing Language Configurations
 
 - Configurations are automatically saved to local storage
 - Select or delete saved languages from the sidebar
 - Click language names to load them, use trash icon to delete
 
-### 3. Example Shiki Configuration
+### 4. Example Shiki Configuration
 
 ```json
 {
