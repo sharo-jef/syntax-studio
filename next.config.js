@@ -5,8 +5,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.NODE_ENV === "production" ? "/my-syntax" : "",
-  assetPrefix: process.env.NODE_ENV === "production" ? "/my-syntax/" : "",
+  basePath: process.env.NODE_ENV === "production" ? "/syntax-studio" : "",
+  assetPrefix: process.env.NODE_ENV === "production" ? "/syntax-studio/" : "",
 };
 
 module.exports = nextConfig;
