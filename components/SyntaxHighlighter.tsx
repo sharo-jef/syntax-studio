@@ -466,7 +466,10 @@ const SyntaxHighlighter: React.FC = () => {
         {saveStatus && <div style={styles.saveNotification}>{saveStatus}</div>}
         <div style={styles.editorContainer}>
           <div style={styles.leftPanel}>
-            <div style={styles.panelHeader}>{t("panels.sampleCode")}</div>
+            <div style={styles.panelHeader}>
+              <span>{t("panels.sampleCode")}</span>
+              <div style={styles.headerSpacer}></div>
+            </div>
             <MonacoEditor
               value={languageCode}
               onChange={setLanguageCode}
@@ -483,7 +486,7 @@ const SyntaxHighlighter: React.FC = () => {
                 onClick={() => setIsHelpModalOpen(true)}
                 title={t("help.openHelp")}
               >
-                <HiOutlineQuestionMarkCircle size={16} />
+                <HiOutlineQuestionMarkCircle size={18} />
               </button>
             </div>
             <MonacoEditor
@@ -610,6 +613,10 @@ const styles = {
     justifyContent: "center",
     transition: "background-color 0.2s ease, color 0.2s ease",
     outline: "none",
+  },
+  headerSpacer: {
+    width: "26px", // Same width as the help button (18px icon + 4px padding on each side)
+    height: "26px",
   },
   saveNotification: {
     position: "fixed" as const,
