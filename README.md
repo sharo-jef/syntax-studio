@@ -9,6 +9,7 @@ A web application for creating and editing custom language syntax highlighting. 
 - 🎯 **Shiki Support**: TextMate grammar-based syntax highlighting
 - 💾 **Local Storage**: Automatic saving of created language configurations
 - 🗂️ **Sidebar Management**: Manage and quickly access saved languages
+- 🌍 **Internationalization**: Multi-language support (English/Japanese)
 - 📱 **Responsive Design**: Desktop and mobile compatible
 
 ## Tech Stack
@@ -23,17 +24,26 @@ A web application for creating and editing custom language syntax highlighting. 
 
 ```
 components/
+├── LanguageSwitcher.tsx  # Language switcher component
 ├── MonacoEditor.tsx      # Monaco Editor component
 ├── Sidebar.tsx           # Sidebar (language management)
 ├── SyntaxHighlighter.tsx # Main application
 └── TabBar.tsx           # Tab bar component
 
 data/
-└── sampleConfigs.ts     # Sample language configurations
+├── sampleConfigs.ts     # Sample language configurations
+└── shikiSchema.ts       # Shiki JSON schema and completion data
 
 hooks/
 ├── useAutoSave.ts       # Auto-save hook
+├── useI18n.ts           # Internationalization hook
 └── useLocalStorage.ts   # Local storage management
+
+i18n/
+├── en.ts               # English translations
+├── I18nProvider.tsx    # I18n context provider
+├── index.ts            # I18n configuration
+└── ja.ts               # Japanese translations
 
 pages/
 ├── _app.tsx            # Next.js application configuration
@@ -45,7 +55,8 @@ styles/
 └── globals.module.css  # CSS modules
 
 types/
-└── syntax.ts           # Type definitions
+├── i18n.ts             # I18n type definitions
+└── syntax.ts           # Syntax type definitions
 ```
 
 ## Setup
@@ -59,8 +70,8 @@ types/
 
 ```bash
 # Clone the repository
-git clone https://github.com/sharo-jef/my-syntax.git
-cd my-syntax
+git clone https://github.com/sharo-jef/syntax-studio.git
+cd syntax-studio
 
 # Install dependencies
 npm install
@@ -113,13 +124,18 @@ The Shiki configuration editor provides comprehensive auto-completion:
 - Use arrow keys to navigate suggestions, `Enter` to accept
 - `Tab` key for snippet field navigation
 
-### 3. Saving and Managing Language Configurations
+### 3. Language Settings
+
+- Use the language switcher in the top-right corner to switch between English and Japanese
+- Language preference is automatically saved to local storage
+
+### 4. Saving and Managing Language Configurations
 
 - Configurations are automatically saved to local storage
 - Select or delete saved languages from the sidebar
 - Click language names to load them, use trash icon to delete
 
-### 4. Example Shiki Configuration
+### 5. Example Shiki Configuration
 
 ```json
 {
@@ -197,6 +213,24 @@ interface ShikiConfig {
 
 1. Create a new file in the `hooks/` directory
 2. Follow custom hook best practices
+
+### Adding New Translations
+
+1. Add translation keys to `i18n/en.ts` and `i18n/ja.ts`
+2. Use the `useI18n` hook to access translations in components
+3. Follow the existing translation structure
+
+### Using Internationalization
+
+```typescript
+import { useI18n } from "../hooks/useI18n";
+
+const MyComponent = () => {
+  const { t } = useI18n();
+
+  return <div>{t("common.save")}</div>;
+};
+```
 
 ### Editing Styles
 
