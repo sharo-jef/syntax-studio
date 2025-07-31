@@ -1,0 +1,270 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  border-radius: 8px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 0;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.content {
+  padding: 0 24px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+
+.section p {
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+  color: #555;
+}
+
+.section ul {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.8;
+  color: #555;
+}
+
+.section li {
+  margin-bottom: 8px;
+}
+
+.codeExample {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
+.codeExample pre {
+  margin: 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  white-space: pre;
+}
+
+.scopeList {
+  display: grid;
+  gap: 12px;
+}
+
+.scopeItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #007acc;
+}
+
+.scopeItem code {
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  color: #d73a49;
+  white-space: nowrap;
+  min-width: 200px;
+}
+
+.scopeItem span {
+  color: #555;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.section code {
+  background-color: #f1f3f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  color: #d73a49;
+}
+
+.section strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .modal {
+    background: #1e1e1e;
+    color: #e0e0e0;
+  }
+
+  .header {
+    border-bottom-color: #333;
+  }
+
+  .header h2 {
+    color: #e0e0e0;
+  }
+
+  .closeButton {
+    color: #999;
+  }
+
+  .closeButton:hover {
+    background-color: #333;
+    color: #e0e0e0;
+  }
+
+  .section h3 {
+    color: #e0e0e0;
+    border-bottom-color: #333;
+  }
+
+  .section p,
+  .section ul,
+  .section li {
+    color: #ccc;
+  }
+
+  .section strong {
+    color: #e0e0e0;
+  }
+
+  .codeExample {
+    background-color: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .codeExample pre {
+    color: #e0e0e0;
+  }
+
+  .scopeItem {
+    background-color: #2d2d2d;
+    border-left-color: #0078d4;
+  }
+
+  .scopeItem code {
+    background-color: #404040;
+    color: #f97583;
+  }
+
+  .scopeItem span {
+    color: #ccc;
+  }
+
+  .section code {
+    background-color: #404040;
+    color: #f97583;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .overlay {
+    padding: 10px;
+  }
+
+  .modal {
+    max-height: 95vh;
+  }
+
+  .header {
+    padding: 16px 20px 0;
+  }
+
+  .header h2 {
+    font-size: 20px;
+  }
+
+  .content {
+    padding: 0 20px 20px;
+  }
+
+  .section h3 {
+    font-size: 16px;
+  }
+
+  .scopeItem {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .scopeItem code {
+    min-width: auto;
+  }
+}

@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from "react";
 import { MonacoEditor } from "../components/MonacoEditor";
 import { Sidebar } from "../components/Sidebar";
+import { ShikiHelpModal } from "../components/ShikiHelpModal";
 import { useLocalStorage, generateId } from "../hooks/useLocalStorage";
 import { useI18n } from "../i18n/I18nProvider";
 import { LanguageConfig, ShikiConfig, SavedLanguage } from "../types/syntax";
+import { HiOutlineQuestionMarkCircle } from "react-icons/hi2";
 
 const SyntaxHighlighter: React.FC = () => {
   const { t, currentLocale } = useI18n();
@@ -11,6 +13,7 @@ const SyntaxHighlighter: React.FC = () => {
   const [shikiConfig, setShikiConfig] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<string>("");
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
 
   // Initialize with translated content only if no saved languages exist
   React.useEffect(() => {
@@ -397,7 +400,16 @@ const SyntaxHighlighter: React.FC = () => {
           </div>
 
           <div style={styles.rightPanel}>
-            <div style={styles.panelHeader}>{t("panels.shikiConfig")}</div>
+            <div style={styles.panelHeader}>
+              <span>{t("panels.shikiConfig")}</span>
+              <button
+                style={styles.helpButton}
+                onClick={() => setIsHelpModalOpen(true)}
+                title={t("help.openHelp")}
+              >
+                <HiOutlineQuestionMarkCircle size={16} />
+              </button>
+            </div>
             <MonacoEditor
               value={shikiConfig}
               onChange={setShikiConfig}
@@ -455,6 +467,11 @@ const SyntaxHighlighter: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ShikiHelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+      />
     </div>
   );
 };
@@ -501,6 +518,21 @@ const styles = {
     fontSize: "12px",
     fontWeight: 500 as const,
     color: "#cccccc",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  helpButton: {
+    background: "none",
+    border: "none",
+    color: "#cccccc",
+    cursor: "pointer",
+    padding: "4px",
+    borderRadius: "3px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background-color 0.2s ease, color 0.2s ease",
   },
   saveNotification: {
     position: "fixed" as const,
