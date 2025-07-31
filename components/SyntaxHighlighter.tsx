@@ -64,6 +64,82 @@ const SyntaxHighlighter: React.FC = () => {
     }
   });
 
+  // Manual save function
+  const handleManualSave = useCallback(() => {
+    if (currentLanguageConfig && currentShikiConfig && currentLanguageId) {
+      const existingSaved = savedLanguages.find(
+        (lang: SavedLanguage) => lang.id === currentLanguageId
+      );
+
+      if (existingSaved) {
+        const displayName =
+          currentShikiConfig.displayName || currentShikiConfig.name;
+        const name =
+          displayName && displayName !== existingSaved.name
+            ? displayName
+            : existingSaved.name;
+
+        try {
+          saveLanguage(
+            currentLanguageId,
+            name,
+            currentLanguageConfig,
+            currentShikiConfig,
+            languageCode
+          );
+          setSaveStatus(t("saveStatus.saved"));
+          setTimeout(() => setSaveStatus(""), 2000);
+        } catch (error) {
+          setSaveStatus(t("saveStatus.failed"));
+          setTimeout(() => setSaveStatus(""), 2000);
+        }
+      } else {
+        // Create new language if not exists
+        const name = `${t(
+          "languages.newLanguage"
+        )} ${new Date().toLocaleTimeString()}`;
+        try {
+          saveLanguage(
+            currentLanguageId,
+            name,
+            currentLanguageConfig,
+            currentShikiConfig,
+            languageCode
+          );
+          setSaveStatus(t("saveStatus.saved"));
+          setTimeout(() => setSaveStatus(""), 2000);
+        } catch (error) {
+          setSaveStatus(t("saveStatus.failed"));
+          setTimeout(() => setSaveStatus(""), 2000);
+        }
+      }
+    } else {
+      setSaveStatus(t("saveStatus.noContent"));
+      setTimeout(() => setSaveStatus(""), 2000);
+    }
+  }, [
+    currentLanguageConfig,
+    currentShikiConfig,
+    currentLanguageId,
+    languageCode,
+    savedLanguages,
+    saveLanguage,
+    t,
+  ]);
+
+  // Handle Ctrl+S to prevent browser save and trigger manual save
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "s") {
+        e.preventDefault();
+        handleManualSave();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleManualSave]);
+
   // 関数の参照を安定化
   const saveLanguageRef = React.useRef(saveLanguage);
   const savedLanguagesRef = React.useRef(savedLanguages);
@@ -533,6 +609,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     transition: "background-color 0.2s ease, color 0.2s ease",
+    outline: "none",
   },
   saveNotification: {
     position: "fixed" as const,
@@ -542,6 +619,17 @@ const styles = {
     padding: "8px 12px",
     fontSize: "12px",
     zIndex: 1000,
+  },
+  saveShortcutInfo: {
+    position: "fixed" as const,
+    top: "8px",
+    right: "8px",
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: "11px",
+    padding: "4px 8px",
+    background: "rgba(0, 0, 0, 0.3)",
+    borderRadius: "3px",
+    zIndex: 999,
   },
 };
 

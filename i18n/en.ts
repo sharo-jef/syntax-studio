@@ -51,6 +51,7 @@ export const enTranslations: Translations = {
   saveStatus: {
     saved: 'Saved',
     failed: 'Save failed',
+    noContent: 'No content to save',
   },
   
   help: {

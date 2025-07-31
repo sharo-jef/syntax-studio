@@ -51,6 +51,7 @@ export const jaTranslations: Translations = {
   saveStatus: {
     saved: '保存しました',
     failed: '保存に失敗しました',
+    noContent: '保存するコンテンツがありません',
   },
   
   help: {

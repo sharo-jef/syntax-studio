@@ -62,6 +62,7 @@ export interface Translations {
   saveStatus: {
     saved: string;
     failed: string;
+    noContent: string;
   };
   
   // Help modal
