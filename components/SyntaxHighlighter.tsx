@@ -470,15 +470,10 @@ const styles = {
     position: "fixed" as const,
     bottom: "16px",
     right: "16px",
-    background: "rgba(0, 0, 0, 0.8)",
-    color: "#4CAF50",
+    color: "rgba(255, 255, 255, 0.6)",
     padding: "8px 12px",
-    borderRadius: "4px",
     fontSize: "12px",
     zIndex: 1000,
-    border: "1px solid rgba(76, 175, 80, 0.3)",
-    backdropFilter: "blur(4px)",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
   },
 };
 
