@@ -6,6 +6,8 @@ import {
   VscChevronRight,
 } from "react-icons/vsc";
 import { SavedLanguage } from "../types/syntax";
+import { useI18n } from "../i18n/I18nProvider";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface SidebarProps {
   savedLanguages: SavedLanguage[];
@@ -24,6 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNewLanguage,
   currentLanguageId,
 }) => {
+  const { t } = useI18n();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -82,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          title={isCollapsed ? "展開" : "折りたたみ"}
+          title={isCollapsed ? t("sidebar.expand") : t("sidebar.collapse")}
           style={{
             ...sidebarStyles.collapseBtn,
             ...(isCollapsed ? { margin: "0 auto" } : {}),
@@ -92,11 +95,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
         {!isCollapsed && (
           <>
-            <h3 style={sidebarStyles.title}>Syntax Studio</h3>
+            <h3 style={sidebarStyles.title}>{t("app.title")}</h3>
             <div style={sidebarStyles.headerActions}>
+              <LanguageSwitcher />
               <button
                 onClick={onNewLanguage}
-                title="新しい言語を作成"
+                title={t("sidebar.newLanguage")}
                 style={sidebarStyles.newTabBtn}
               >
                 <VscAdd />
@@ -110,9 +114,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div style={sidebarStyles.languageList}>
           {savedLanguages.length === 0 ? (
             <div style={sidebarStyles.emptyState}>
-              <p style={sidebarStyles.emptyText}>保存された言語がありません</p>
               <p style={sidebarStyles.emptyText}>
-                新しい言語を作成してください
+                {t("sidebar.noSavedLanguages")}
+              </p>
+              <p style={sidebarStyles.emptyText}>
+                {t("sidebar.createNewLanguage")}
               </p>
             </div>
           ) : (
@@ -155,7 +161,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                   )}
                   <div style={sidebarStyles.languageMeta}>
-                    更新: {new Date(language.updatedAt).toLocaleDateString()}
+                    {t("sidebar.updated")}:{" "}
+                    {new Date(language.updatedAt).toLocaleDateString()}
                   </div>
                 </div>
                 <div style={sidebarStyles.languageActions}>
@@ -165,7 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       handleDeleteConfirm(language);
                     }}
                     style={sidebarStyles.deleteButton}
-                    title="削除"
+                    title={t("sidebar.delete")}
                   >
                     <VscTrash />
                   </button>
@@ -176,19 +183,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       )}
 
-      {/* 削除確認モーダル */}
+      {/* Delete confirmation modal */}
       {deleteConfirmModal.isOpen && deleteConfirmModal.language && (
         <div style={sidebarStyles.modalOverlay}>
           <div style={sidebarStyles.modal}>
             <div style={sidebarStyles.modalHeader}>
-              <h4 style={sidebarStyles.modalTitle}>言語の削除</h4>
+              <h4 style={sidebarStyles.modalTitle}>
+                {t("sidebar.deleteLanguage")}
+              </h4>
             </div>
             <div style={sidebarStyles.modalBody}>
               <p style={sidebarStyles.modalMessage}>
-                「{deleteConfirmModal.language.name}」を削除しますか？
+                {t("sidebar.deleteConfirmMessage", {
+                  name: deleteConfirmModal.language.name,
+                })}
               </p>
               <p style={sidebarStyles.modalSubmessage}>
-                この操作は取り消せません。
+                {t("sidebar.deleteConfirmSubmessage")}
               </p>
             </div>
             <div style={sidebarStyles.modalFooter}>
@@ -196,13 +207,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={handleDeleteCancel}
                 style={sidebarStyles.modalCancelButton}
               >
-                キャンセル
+                {t("sidebar.cancel")}
               </button>
               <button
                 onClick={handleDeleteExecute}
                 style={sidebarStyles.modalDeleteButton}
               >
-                削除
+                {t("sidebar.deleteAction")}
               </button>
             </div>
           </div>
@@ -254,8 +265,8 @@ const sidebarStyles = {
   },
   headerActions: {
     display: "flex",
+    alignItems: "center",
     gap: "4px",
-    marginLeft: "auto",
   },
   newTabBtn: {
     background: "transparent",

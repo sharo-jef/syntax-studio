@@ -10,23 +10,23 @@ export const useAutoSave = (
   const lastSaveTimeRef = useRef<number>(Date.now());
   const onSaveRef = useRef(onSave);
 
-  // onSave関数の参照を更新（useEffectの依存関係から外すため）
+  // Update onSave function reference (to exclude from useEffect dependencies)
   useEffect(() => {
     onSaveRef.current = onSave;
   });
 
   useEffect(() => {
-    // 値が変更された場合のみ処理
+    // Process only when value changes
     if (value !== previousValueRef.current) {
-      // 既存のタイマーをクリア
+      // Clear existing timer
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
 
-      // 新しいタイマーを設定
+      // Set new timer
       timeoutRef.current = setTimeout(() => {
         const now = Date.now();
-        // 最後の保存から十分時間が経過している場合のみ保存
+        // Save only if enough time has passed since the last save
         if (now - lastSaveTimeRef.current >= delay / 2) {
           onSaveRef.current(value);
           previousValueRef.current = value;
@@ -35,15 +35,15 @@ export const useAutoSave = (
       }, delay);
     }
 
-    // クリーンアップ
+    // Cleanup
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [value, delay]); // onSaveを依存関係から除外
+  }, [value, delay]); // Exclude onSave from dependencies
 
-  // 即座に保存する関数を提供
+  // Provide function to save immediately
   const saveImmediately = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -56,18 +56,18 @@ export const useAutoSave = (
     }
   }, [value]);
 
-  // コンポーネントのアンマウント時に最終保存
+  // Final save on component unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      // 未保存の変更があれば即座に保存
+      // Save immediately if there are unsaved changes
       if (value !== previousValueRef.current) {
         onSaveRef.current(value);
       }
     };
-  }, []); // 空の依存関係配列でアンマウント時のみ実行
+  }, []); // Empty dependency array to execute only on unmount
 
   return { saveImmediately };
 };

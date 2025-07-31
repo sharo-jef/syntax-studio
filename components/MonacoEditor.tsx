@@ -129,7 +129,7 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
     [convertShikiToMonarch]
   );
 
-  // languageConfigが変更された時に言語を再登録
+  // Re-register language when languageConfig changes
   React.useEffect(() => {
     if (
       isEditorMounted &&
@@ -172,7 +172,7 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
       });
     }
 
-    // ペースト時の処理を追加
+    // Add paste event handling
     editor.onDidPaste(() => {
       const currentValue = editor.getValue();
       setTimeout(() => {
@@ -180,7 +180,7 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
       }, 100);
     });
 
-    // フォーカスを失った時の処理を追加
+    // Add handling for when editor loses focus
     editor.onDidBlurEditorText(() => {
       const currentValue = editor.getValue();
       onChange(currentValue);

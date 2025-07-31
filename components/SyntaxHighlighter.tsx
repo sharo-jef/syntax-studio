@@ -2,15 +2,41 @@ import React, { useState, useCallback } from "react";
 import { MonacoEditor } from "../components/MonacoEditor";
 import { Sidebar } from "../components/Sidebar";
 import { useLocalStorage, generateId } from "../hooks/useLocalStorage";
+import { useI18n } from "../i18n/I18nProvider";
 import { LanguageConfig, ShikiConfig, SavedLanguage } from "../types/syntax";
 
 const SyntaxHighlighter: React.FC = () => {
-  const [languageCode, setLanguageCode] = useState<string>(
-    '// 新しい言語のサンプルコード\nfunction hello() {\n  return "Hello, World!";\n}'
-  );
-  const [shikiConfig, setShikiConfig] = useState<string>(
-    '{\n  "name": "my-language",\n  "displayName": "My Language",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}'
-  );
+  const { t, currentLocale } = useI18n();
+  const [languageCode, setLanguageCode] = useState<string>("");
+  const [shikiConfig, setShikiConfig] = useState<string>("");
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
+  // Initialize with translated content only once
+  React.useEffect(() => {
+    if (!isInitialized) {
+      setLanguageCode(t("sampleCode.newLanguageSample"));
+      setShikiConfig(
+        '{\n  "name": "my-language",\n  "displayName": "My Language",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}'
+      );
+      setIsInitialized(true);
+    }
+  }, [t, isInitialized]);
+
+  // Handle locale changes - update default content if and only if untouched
+  React.useEffect(() => {
+    // 厳密に「初期状態」のみ書き換え（空 or 現在の言語の初期サンプルのみ）
+    const defaultSamples = [
+      t("sampleCode.newLanguageSample"),
+      t("sampleCode.myLanguageSample"),
+    ];
+    const isDefaultContent =
+      languageCode === "" || defaultSamples.includes(languageCode);
+
+    if (isDefaultContent && isInitialized) {
+      setLanguageCode(t("sampleCode.newLanguageSample"));
+    }
+    // それ以外（ユーザーが編集済み）は絶対に上書きしない
+  }, [currentLocale, t, languageCode, isInitialized]);
 
   const [currentLanguageConfig, setCurrentLanguageConfig] = useState<
     LanguageConfig | undefined
@@ -18,7 +44,6 @@ const SyntaxHighlighter: React.FC = () => {
   const [currentShikiConfig, setCurrentShikiConfig] = useState<
     ShikiConfig | undefined
   >();
-  const [currentLanguageId, setCurrentLanguageId] = useState<string>("");
 
   const {
     savedLanguages,
@@ -28,6 +53,15 @@ const SyntaxHighlighter: React.FC = () => {
     saveCurrentLanguageId,
     getCurrentLanguageId,
   } = useLocalStorage();
+
+  // Initialize currentLanguageId with the stored value immediately
+  const [currentLanguageId, setCurrentLanguageId] = useState<string>(() => {
+    try {
+      return getCurrentLanguageId() || "";
+    } catch {
+      return "";
+    }
+  });
 
   // 関数の参照を安定化
   const saveLanguageRef = React.useRef(saveLanguage);
@@ -40,10 +74,9 @@ const SyntaxHighlighter: React.FC = () => {
 
   const handleNewLanguage = () => {
     const id = generateId();
-    const newLanguageCode =
-      '// 新しい言語のサンプルコード\nfunction hello() {\n  return "Hello, World!";\n}';
-    const newShikiConfig =
-      '{\n  "name": "my-language",\n  "displayName": "My Language",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}';
+    const newLanguageCode = t("sampleCode.newLanguageSample");
+    const myLanguageTranslation = t("languages.myLanguage");
+    const newShikiConfig = `{\n  "name": "my-language",\n  "displayName": "${myLanguageTranslation}",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}`;
 
     try {
       // Parse the config immediately
@@ -53,7 +86,7 @@ const SyntaxHighlighter: React.FC = () => {
         name:
           parsedShikiConfig.displayName ||
           parsedShikiConfig.name ||
-          "My Language",
+          myLanguageTranslation,
         extensions: [`.${parsedShikiConfig.name || "custom"}`],
         aliases: parsedShikiConfig.aliases || [],
         shikiConfig: parsedShikiConfig,
@@ -84,11 +117,13 @@ const SyntaxHighlighter: React.FC = () => {
       setCurrentLanguageConfig(languageConfig);
       setCurrentShikiConfig(parsedShikiConfig);
 
-      // 現在の言語IDを保存
+      // Save current language ID
       saveCurrentLanguageId(id);
 
       // Auto-save the new language
-      const name = `新しい言語 ${new Date().toLocaleTimeString()}`;
+      const name = `${t(
+        "languages.newLanguage"
+      )} ${new Date().toLocaleTimeString()}`;
       setTimeout(() => {
         saveLanguageRef.current(
           id,
@@ -107,7 +142,7 @@ const SyntaxHighlighter: React.FC = () => {
     }
   };
 
-  // 自動保存機能: コードまたは設定が変更されたら自動で保存
+  // Auto-save functionality: automatically save when code or config changes
   React.useEffect(() => {
     if (
       currentLanguageConfig &&
@@ -117,14 +152,14 @@ const SyntaxHighlighter: React.FC = () => {
     ) {
       // debounce効果のため少し遅延を追加
       const timeoutId = setTimeout(() => {
-        // 既存の保存された言語を探す
+        // Find existing saved language
         const existingSaved = savedLanguagesRef.current.find(
           (lang: SavedLanguage) => lang.id === currentLanguageId
         );
 
-        // 既存の言語のみ自動保存
+        // Auto-save only existing languages
         if (existingSaved) {
-          // displayNameが変更された場合は名前も更新
+          // Update name if displayName has changed
           const displayName =
             currentShikiConfig.displayName || currentShikiConfig.name;
           const shouldUpdateName =
@@ -156,49 +191,46 @@ const SyntaxHighlighter: React.FC = () => {
     setCurrentLanguageConfig(language.languageConfig);
     setCurrentShikiConfig(language.shikiConfig);
     setCurrentLanguageId(language.id);
-
-    // 現在の言語IDを保存
     saveCurrentLanguageId(language.id);
   };
 
   const handleDeleteLanguage = (id: string) => {
-    // 削除される言語が現在選択中の場合、一つ上の言語を選択
+    // If deleting the currently selected language, select the previous one
     if (id === currentLanguageId) {
       const currentIndex = savedLanguages.findIndex((lang) => lang.id === id);
       let nextLanguage: SavedLanguage | null = null;
 
       if (currentIndex > 0) {
-        // 一つ上の言語を選択
+        // Select the previous language
         nextLanguage = savedLanguages[currentIndex - 1];
       } else if (savedLanguages.length > 1) {
-        // 最初の言語を削除する場合は次の言語を選択
+        // If deleting the first language, select the next one
         nextLanguage = savedLanguages[1];
       }
 
-      // 言語を削除
+      // Delete the language
       deleteLanguage(id);
 
       if (nextLanguage) {
-        // 一つ上（または次）の言語を読み込み
+        // Load the previous (or next) language
         handleLoadLanguage(nextLanguage);
       } else {
-        // 他に言語がない場合はデフォルト状態に戻す
+        // If there are no other languages, reset to default state
         setCurrentLanguageId("");
         setCurrentLanguageConfig(undefined);
         setCurrentShikiConfig(undefined);
-        setLanguageCode(
-          '// 新しい言語のサンプルコード\nfunction hello() {\n  return "Hello, World!";\n}'
-        );
-        setShikiConfig(
-          '{\n  "name": "my-language",\n  "displayName": "My Language",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}'
-        );
+        setLanguageCode(t("sampleCode.newLanguageSample"));
+        const defaultShikiConfig = `{\n  "name": "my-language",\n  "displayName": "${t(
+          "languages.myLanguage"
+        )}",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}`;
+        setShikiConfig(defaultShikiConfig);
         saveCurrentLanguageId("");
         setTimeout(() => {
           updateConfigs();
         }, 0);
       }
     } else {
-      // 選択中でない言語を削除する場合は単純に削除
+      // Simply delete if not the currently selected language
       deleteLanguage(id);
     }
   };
@@ -223,7 +255,7 @@ const SyntaxHighlighter: React.FC = () => {
         language.sampleCode
       );
 
-      // 現在編集中の言語の場合は状態も更新
+      // Also update state if this is the currently edited language
       if (id === currentLanguageId) {
         setCurrentLanguageConfig(updatedLanguageConfig);
         setCurrentShikiConfig(updatedShikiConfig);
@@ -232,6 +264,11 @@ const SyntaxHighlighter: React.FC = () => {
   };
 
   const updateConfigs = useCallback(() => {
+    // Don't try to parse empty or whitespace-only strings
+    if (!shikiConfig || !shikiConfig.trim()) {
+      return;
+    }
+
     try {
       const parsedShikiConfig = JSON.parse(shikiConfig);
       setCurrentShikiConfig(parsedShikiConfig);
@@ -243,7 +280,7 @@ const SyntaxHighlighter: React.FC = () => {
         name:
           parsedShikiConfig.displayName ||
           parsedShikiConfig.name ||
-          "Custom Language",
+          t("languages.customLanguage"),
         extensions: [`.${parsedShikiConfig.name || "custom"}`],
         aliases: parsedShikiConfig.aliases || [],
         shikiConfig: parsedShikiConfig,
@@ -276,30 +313,31 @@ const SyntaxHighlighter: React.FC = () => {
     }
   }, [shikiConfig, currentLanguageId]);
 
-  // 初期化時に最後に選択していた言語を復元
+  // Restore the last selected language on initialization
   React.useEffect(() => {
-    const lastLanguageId = getCurrentLanguageId();
-    if (lastLanguageId && savedLanguages.length > 0) {
-      const lastLanguage = savedLanguages.find(
-        (lang) => lang.id === lastLanguageId
-      );
-      if (lastLanguage) {
-        handleLoadLanguage(lastLanguage);
+    if (savedLanguages.length > 0 && !currentLanguageId) {
+      const lastLanguageId = getCurrentLanguageId();
+      if (lastLanguageId) {
+        const lastLanguage = savedLanguages.find(
+          (lang) => lang.id === lastLanguageId
+        );
+        if (lastLanguage) {
+          setCurrentLanguageId(lastLanguageId);
+          setLanguageCode(lastLanguage.sampleCode);
+          setShikiConfig(JSON.stringify(lastLanguage.shikiConfig, null, 2));
+          setCurrentLanguageConfig(lastLanguage.languageConfig);
+          setCurrentShikiConfig(lastLanguage.shikiConfig);
+        }
       }
     }
-  }, [savedLanguages]); // savedLanguagesが読み込まれた後に実行
+  }, [savedLanguages, currentLanguageId, getCurrentLanguageId]); // Execute after savedLanguages is loaded
 
-  // 初期化時に設定を更新（一度だけ実行）
+  // Update configuration when shikiConfig changes and is not empty
   React.useEffect(() => {
-    if (shikiConfig) {
+    if (shikiConfig && shikiConfig.trim()) {
       updateConfigs();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // shikiConfigが変更された時のみ設定を更新
-  React.useEffect(() => {
-    updateConfigs();
-  }, [shikiConfig, currentLanguageId]); // updateConfigsは除外
+  }, [shikiConfig, currentLanguageId, updateConfigs]);
 
   return (
     <div style={styles.app}>
@@ -315,7 +353,7 @@ const SyntaxHighlighter: React.FC = () => {
       <div style={styles.mainContent}>
         <div style={styles.editorContainer}>
           <div style={styles.leftPanel}>
-            <div style={styles.panelHeader}>サンプルコード</div>
+            <div style={styles.panelHeader}>{t("panels.sampleCode")}</div>
             <MonacoEditor
               value={languageCode}
               onChange={setLanguageCode}
@@ -325,7 +363,7 @@ const SyntaxHighlighter: React.FC = () => {
           </div>
 
           <div style={styles.rightPanel}>
-            <div style={styles.panelHeader}>Shiki設定（JSON）</div>
+            <div style={styles.panelHeader}>{t("panels.shikiConfig")}</div>
             <MonacoEditor
               value={shikiConfig}
               onChange={setShikiConfig}
