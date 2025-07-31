@@ -52,22 +52,19 @@ export const ShikiHelpModal: React.FC<ShikiHelpModalProps> = ({
                 options={{
                   readOnly: true,
                   minimap: { enabled: false },
-                  fontSize: 12,
-                  lineNumbers: "off",
-                  folding: false,
+                  fontSize: 16,
+                  lineNumbers: "on",
+                  folding: true,
                   scrollBeyondLastLine: false,
                   automaticLayout: true,
-                  wordWrap: "on",
-                  renderLineHighlight: "none",
-                  selectionHighlight: false,
+                  wordWrap: "off",
+                  renderLineHighlight: "all",
+                  selectionHighlight: true,
                   occurrencesHighlight: "off",
                   cursorStyle: "line-thin",
                   hideCursorInOverviewRuler: true,
                   overviewRulerBorder: false,
-                  scrollbar: {
-                    vertical: "hidden",
-                    horizontal: "hidden",
-                  },
+                  fixedOverflowWidgets: true,
                 }}
               />
             </div>
