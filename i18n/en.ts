@@ -107,4 +107,11 @@ export const enTranslations: Translations = {
       useMonaco: 'Use Monaco Editor\'s auto-completion to quickly insert scope names and structure templates',
     },
   },
+  
+  themes: {
+    theme: 'Theme',
+    dark: 'Dark',
+    light: 'Light',
+    highContrast: 'High Contrast',
+  },
 };

@@ -107,4 +107,11 @@ export const jaTranslations: Translations = {
       useMonaco: 'Monaco Editorの自動補完機能を活用して、スコープ名や構造テンプレートを素早く挿入できます',
     },
   },
+  
+  themes: {
+    theme: 'テーマ',
+    dark: 'ダーク',
+    light: 'ライト',
+    highContrast: 'ハイコントラスト',
+  },
 };

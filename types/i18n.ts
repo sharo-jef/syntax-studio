@@ -119,4 +119,12 @@ export interface Translations {
       useMonaco: string;
     };
   };
+  
+  // Themes
+  themes: {
+    theme: string;
+    dark: string;
+    light: string;
+    highContrast: string;
+  };
 }

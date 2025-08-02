@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import { MonacoEditor } from "../components/MonacoEditor";
 import { Sidebar } from "../components/Sidebar";
 import { ShikiHelpModal } from "../components/ShikiHelpModal";
+import { ThemeSelector } from "../components/ThemeSelector";
 import { useLocalStorage, generateId } from "../hooks/useLocalStorage";
 import { useI18n } from "../i18n/I18nProvider";
 import { LanguageConfig, ShikiConfig, SavedLanguage } from "../types/syntax";
@@ -14,6 +15,21 @@ const SyntaxHighlighter: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<string>("");
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
+
+  // Theme state with localStorage persistence
+  const [editorTheme, setEditorTheme] = useState<string>(() => {
+    // Initialize theme from localStorage immediately
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("editor-theme") || "vs-dark";
+    }
+    return "vs-dark";
+  });
+
+  // Save theme to localStorage when it changes
+  const handleThemeChange = (theme: string) => {
+    setEditorTheme(theme);
+    localStorage.setItem("editor-theme", theme);
+  };
 
   // Initialize with translated content only if no saved languages exist
   React.useEffect(() => {
@@ -153,7 +169,7 @@ const SyntaxHighlighter: React.FC = () => {
     const id = generateId();
     const newLanguageCode = t("sampleCode.newLanguageSample");
     const myLanguageTranslation = t("languages.myLanguage");
-    const newShikiConfig = `{\n  "name": "my-language",\n  "displayName": "${myLanguageTranslation}",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}`;
+    const newShikiConfig = `{\n  "name": "my-language",\n  "displayName": "${myLanguageTranslation}",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"]*\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}`;
 
     try {
       // Parse the config immediately
@@ -318,7 +334,7 @@ const SyntaxHighlighter: React.FC = () => {
         setLanguageCode(t("sampleCode.newLanguageSample"));
         const defaultShikiConfig = `{\n  "name": "my-language",\n  "displayName": "${t(
           "languages.myLanguage"
-        )}",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}`;
+        )}",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"]*\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}`;
         setShikiConfig(defaultShikiConfig);
         saveCurrentLanguageId("");
         setTimeout(() => {
@@ -431,7 +447,7 @@ const SyntaxHighlighter: React.FC = () => {
     if (isInitialized && !currentLanguageId && languageCode === "") {
       setLanguageCode(t("sampleCode.newLanguageSample"));
       setShikiConfig(
-        '{\n  "name": "my-language",\n  "displayName": "My Language",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"].*?\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}'
+        '{\n  "name": "my-language",\n  "displayName": "My Language",\n  "patterns": [\n    {\n      "name": "keyword.control",\n      "match": "\\\\b(function|return|if|else)\\\\b"\n    },\n    {\n      "name": "string.quoted.double",\n      "match": "\\"[^\\"]*\\""\n    },\n    {\n      "name": "comment.line.double-slash",\n      "match": "//.*$"\n    }\n  ]\n}'
       );
     }
   }, [
@@ -469,12 +485,17 @@ const SyntaxHighlighter: React.FC = () => {
             <div style={styles.panelHeader}>
               <span>{t("panels.sampleCode")}</span>
               <div style={styles.headerSpacer}></div>
+              <ThemeSelector
+                currentTheme={editorTheme}
+                onThemeChange={handleThemeChange}
+              />
             </div>
             <MonacoEditor
               value={languageCode}
               onChange={setLanguageCode}
               language={currentLanguageConfig?.id || "javascript"}
               languageConfig={currentLanguageConfig}
+              theme={editorTheme}
             />
           </div>
 
@@ -493,6 +514,7 @@ const SyntaxHighlighter: React.FC = () => {
               value={shikiConfig}
               onChange={setShikiConfig}
               language="json"
+              theme={editorTheme}
               options={{
                 suggest: {
                   showKeywords: true,
@@ -550,6 +572,7 @@ const SyntaxHighlighter: React.FC = () => {
       <ShikiHelpModal
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
+        theme={editorTheme}
       />
     </div>
   );

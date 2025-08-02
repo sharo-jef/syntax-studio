@@ -6,11 +6,13 @@ import styles from "../styles/ShikiHelpModal.module.css";
 interface ShikiHelpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  theme?: string;
 }
 
 export const ShikiHelpModal: React.FC<ShikiHelpModalProps> = ({
   isOpen,
   onClose,
+  theme = "vs-dark",
 }) => {
   const { t } = useI18n();
 
@@ -48,7 +50,7 @@ export const ShikiHelpModal: React.FC<ShikiHelpModalProps> = ({
 }`}
                 onChange={() => {}} // Read-only
                 language="json"
-                theme="vs-dark"
+                theme={theme}
                 options={{
                   readOnly: true,
                   minimap: { enabled: false },
